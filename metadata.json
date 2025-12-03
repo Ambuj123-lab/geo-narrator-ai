@@ -1,0 +1,7 @@
+{
+  "name": "Geo-Narrator AI",
+  "description": "AI-powered neighborhood explorer using Gemini 1.5 Flash and Maps.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
