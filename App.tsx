@@ -759,7 +759,7 @@ export default function App() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 h-full relative">
+      <div className="flex-1 h-full min-h-screen md:min-h-0 relative">
         <MapContainer
           center={[28.6139, 77.2090]}
           zoom={13}
