@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, ZoomControl, LayersControl, LayerGroup } from 'react-leaflet';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, ZoomControl, LayersControl, LayerGroup, useMap } from 'react-leaflet';
 import {
   MapPin,
   Loader2,
@@ -18,27 +18,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Fix for Leaflet default icon
 import L from 'leaflet';
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+import 'leaflet/dist/leaflet.css';
+
+const icon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
+
+L.Marker.prototype.options.icon = icon;
+
+const MODEL = 'gemini-2.0-flash-exp';
 
 // --- Types ---
 interface AIResponse {
   title: string;
   location: string;
   description: string;
-  history: string;
-  architecture: string;
+  history?: string;
+  architecture?: string;
   vibe: string;
   food: string;
   funFact: string;
   rating: number;
-  isLocation: boolean;
-  fallbackMessage?: string;
-  importantTimeline?: Array<{ year: string, event: string }>;
   geographicalContext?: {
     state: string;
     mainRiver: string;
@@ -46,22 +52,39 @@ interface AIResponse {
     elevation: string;
   };
   culturalPractices?: {
-    regionalFestivals: string[];
+    regionalFestivals?: string[];
     traditionalArts: {
       dance: string;
       music: string;
       craft: string;
     };
-    regionalCuisine: string[];
-    localHandicrafts: string[];
+    regionalCuisine?: string[];
+    localHandicrafts?: string[];
   };
   trivia?: string[];
   nearbyPlaces?: string[];
+  importantTimeline?: { year: string; event: string }[];
 }
 
 // Initialize API Key
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 const APP_PASSWORD = import.meta.env.VITE_APP_PASSWORD || "AmbujAI";
+
+// Map Resizer Component - Forces Leaflet to recalculate dimensions
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Wait for DOM to settle, then invalidate size
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  return null;
+}
 
 
 // --- Components ---
@@ -793,6 +816,7 @@ export default function App() {
               />
             </LayersControl.BaseLayer>
           </LayersControl>
+          <MapResizer />
           <LocationMarker setPos={setPosition} onLocationSelect={handleMapClick} />
           {position && <Marker position={position} />}
         </MapContainer>
