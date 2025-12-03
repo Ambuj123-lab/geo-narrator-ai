@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, ZoomControl, LayersControl, LayerGroup, useMap } from 'react-leaflet';
+import React, { useState, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, ZoomControl, LayersControl, LayerGroup } from 'react-leaflet';
 import {
   MapPin,
   Loader2,
   Compass,
-  Utensils,
   History,
   Sparkles,
   Landmark,
@@ -12,12 +11,9 @@ import {
   X,
   Info,
   ChevronDown,
-  ChevronUp,
-  Search
+  ChevronUp
 } from 'lucide-react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import jsPDF from 'jspdf';
 
 // Fix for Leaflet default icon
 import L from 'leaflet';
