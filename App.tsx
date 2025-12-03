@@ -679,7 +679,7 @@ export default function App() {
     <div className="h-screen w-screen bg-slate-900 flex flex-col md:flex-row overflow-hidden">
 
       {/* Sidebar */}
-      <div className="w-full md:w-[500px] bg-slate-900 border-r border-slate-800 flex flex-col h-1/2 md:h-full shadow-2xl overflow-y-auto">
+      <div className="w-full md:w-[500px] bg-slate-900 border-r border-slate-800 flex flex-col h-full shadow-2xl overflow-y-auto">
         <div className="p-6 border-b border-slate-800 bg-slate-900/95 sticky top-0 z-10">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
