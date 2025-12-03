@@ -32,8 +32,6 @@ const icon = L.icon({
 
 L.Marker.prototype.options.icon = icon;
 
-const MODEL = 'gemini-2.0-flash-exp';
-
 // --- Types ---
 interface AIResponse {
   title: string;
@@ -45,6 +43,8 @@ interface AIResponse {
   food: string;
   funFact: string;
   rating: number;
+  isLocation: boolean;
+  fallbackMessage?: string;
   geographicalContext?: {
     state: string;
     mainRiver: string;
@@ -353,7 +353,7 @@ const ResultCard = ({ data, loading }: { data: AIResponse | null, loading: boole
             <h4 className="text-orange-400 font-bold mb-3 flex items-center gap-2 text-lg">
               <History size={20} /> Historical Significance
             </h4>
-            <RichText content={data.history} className="text-sm" />
+            <RichText content={data.history || ""} className="text-sm" />
 
             {/* Timeline - NEW */}
             {data.importantTimeline && (
@@ -375,7 +375,7 @@ const ResultCard = ({ data, loading }: { data: AIResponse | null, loading: boole
             <h4 className="text-cyan-400 font-bold mb-3 flex items-center gap-2 text-lg">
               <Landmark size={20} /> Architecture & Design
             </h4>
-            <RichText content={data.architecture} className="text-sm" />
+            <RichText content={data.architecture || ""} className="text-sm" />
           </div>
         </div>
 
