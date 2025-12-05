@@ -89,16 +89,21 @@ function MapResizer() {
 
 // --- Components ---
 
-// 1. Login Component
+// 1. Login Component - ArcGIS Enterprise Style
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [pass, setPass] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const howItWorksRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToHowItWorks = () => {
+    howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1200));
 
     if (pass === APP_PASSWORD) {
       onLogin();
@@ -109,61 +114,287 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 relative overflow-hidden p-4">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-slate-950 overflow-y-auto">
+      {/* Header */}
+      <header className="px-8 py-4 flex items-center justify-between border-b border-slate-800 sticky top-0 bg-slate-950/95 backdrop-blur-sm z-50">
+        <div className="flex items-center gap-3">
+          <Compass className="w-8 h-8 text-cyan-400" />
+          <span className="text-white font-bold text-xl">Geo-Narrator</span>
+        </div>
+        <nav className="flex items-center gap-6">
+          <span className="text-cyan-400 text-sm border-b-2 border-cyan-400 pb-1 cursor-pointer">Overview</span>
+          <span onClick={scrollToHowItWorks} className="text-slate-400 text-sm hover:text-white cursor-pointer transition-colors">How It Works</span>
+        </nav>
+      </header>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-slate-800/80 backdrop-blur-xl border border-slate-700 p-10 rounded-2xl w-full max-w-md text-center relative z-10 shadow-2xl"
-      >
-        <div className="mx-auto w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
-          <Landmark className="text-slate-900 w-10 h-10" />
+      {/* Hero Section */}
+      <div className="min-h-[calc(100vh-65px)] flex flex-col lg:flex-row">
+        {/* Left Side - Branding & Overview */}
+        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16 py-12">
+          {/* Logo */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <Compass className="w-8 h-8 text-slate-900" />
+            </div>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Geo-Narrator <span className="text-cyan-400">AI</span>
+          </h1>
+          <p className="text-xl text-slate-400 mb-8">
+            AI-Powered Geospatial Intelligence Platform
+          </p>
+
+          {/* Overview Section */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">What is Geo-Narrator AI?</h2>
+            <p className="text-slate-400 leading-relaxed mb-4">
+              Geo-Narrator AI is an intelligent geospatial platform that transforms any location
+              into a rich narrative experience. Click anywhere on Earth and discover the
+              <span className="text-amber-400 font-semibold"> history, culture, architecture, and hidden stories </span>
+              of that place using advanced AI.
+            </p>
+            <p className="text-slate-400 leading-relaxed">
+              Built by <span className="text-white font-medium">Ambuj Kumar Tripathi</span>, it integrates
+              Google's Gemini AI with interactive mapping to provide comprehensive location insights
+              including famous landmarks, local cuisine, climate data, and fascinating facts.
+            </p>
+          </div>
+
+          {/* Login Form */}
+          <div className="max-w-sm">
+            <p className="text-slate-500 text-sm uppercase tracking-wider mb-3">Enter Access Code</p>
+            <form onSubmit={handleSubmit} className="flex gap-3">
+              <input
+                type="password"
+                value={pass}
+                onChange={(e) => {
+                  setPass(e.target.value);
+                  setError(false);
+                }}
+                placeholder="••••••••"
+                className={`flex-1 px-4 py-3 bg-slate-900 border rounded-lg text-white tracking-widest font-medium transition-all
+                  ${error ? 'border-red-500' : 'border-slate-700 focus:border-cyan-400'}
+                  focus:outline-none focus:ring-2 focus:ring-cyan-500/20`}
+              />
+              <button
+                type="submit"
+                disabled={loading || !pass}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-900 font-bold rounded-lg transition-all
+                  disabled:opacity-40 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "UNLOCK"}
+              </button>
+            </form>
+            {error && (
+              <p className="text-red-400 text-sm mt-2">Invalid access code</p>
+            )}
+          </div>
         </div>
 
-        <h1 className="text-4xl font-bold text-white mb-2">
-          Geo-Narrator <span className="text-amber-400">AI</span>
-        </h1>
-        <p className="text-amber-300/80 mb-8 text-sm font-medium">
-          Curated by Ambuj Kumar Tripathi
-        </p>
+        {/* Right Side - Realistic Rotating Earth with NASA Texture */}
+        <div className="flex-1 flex items-center justify-center relative overflow-hidden min-h-[400px] lg:min-h-0" style={{ background: 'radial-gradient(ellipse at center, #1e1b4b 0%, #0f0d24 30%, #020617 60%, #000000 100%)' }}>
+          {/* Dense Stars Background - 150 stars */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(150)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  width: Math.random() * 3 + 1 + 'px',
+                  height: Math.random() * 3 + 1 + 'px',
+                  top: Math.random() * 100 + '%',
+                  left: Math.random() * 100 + '%',
+                  background: i % 5 === 0 ? '#fcd34d' : i % 7 === 0 ? '#93c5fd' : '#ffffff',
+                  opacity: Math.random() * 0.8 + 0.2,
+                  animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                  animationDelay: Math.random() * 2 + 's',
+                  boxShadow: i % 5 === 0 ? '0 0 4px #fcd34d' : 'none'
+                }}
+              />
+            ))}
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            type="password"
-            placeholder="Enter Access Code"
-            className="w-full px-6 py-4 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/50 transition-all text-center tracking-widest"
-            value={pass}
-            onChange={(e) => {
-              setPass(e.target.value);
-              setError(false);
-            }}
-          />
+          {/* Nebula/Galaxy Effects - More near Earth */}
+          <div className="absolute inset-0">
+            <div className="absolute top-[20%] right-[20%] w-80 h-80 bg-purple-600/15 rounded-full blur-3xl" />
+            <div className="absolute bottom-[20%] left-[25%] w-72 h-72 bg-blue-600/12 rounded-full blur-3xl" />
+            <div className="absolute top-[40%] right-[30%] w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
+            <div className="absolute top-[30%] left-[40%] w-56 h-56 bg-violet-500/10 rounded-full blur-3xl" />
+            {/* Close to Earth glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-3xl" />
+          </div>
 
-          {error && (
-            <p className="text-red-400 text-sm">
-              ⚠️ Invalid Access Code
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-bold rounded-xl transition-all shadow-lg disabled:opacity-50"
+          {/* 3D Globe with Real Earth Texture */}
+          <motion.div
+            className="relative w-72 h-72 lg:w-96 lg:h-96"
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : "UNLOCK SYSTEM"}
-          </button>
-        </form>
+            {/* Earth with Fully Lit Texture - No dark terminator */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full overflow-hidden"
+              style={{
+                backgroundImage: 'url(https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Earth_Western_Hemisphere_transparent_background.png/600px-Earth_Western_Hemisphere_transparent_background.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                boxShadow: '0 0 100px rgba(56, 189, 248, 0.5), 0 0 60px rgba(56, 189, 248, 0.3)'
+              }}
+            />
 
-        <p className="mt-8 text-xs text-slate-500 uppercase tracking-wider">
-          Secure Environment • v2.0
-        </p>
-      </motion.div>
-    </div>
+            {/* Bright Edge Glow to fill any dark spots */}
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle at 50% 50%, transparent 45%, rgba(56, 189, 248, 0.15) 48%, rgba(56, 189, 248, 0.3) 50%)',
+              }}
+            />
+
+            {/* Atmosphere Glow Layer */}
+            <div
+              className="absolute inset-[-4px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle at 30% 30%, rgba(135, 206, 250, 0.25) 0%, transparent 35%)',
+                boxShadow: '0 0 80px rgba(56, 189, 248, 0.5), 0 0 150px rgba(56, 189, 248, 0.3), inset 0 0 30px rgba(56, 189, 248, 0.1)'
+              }}
+            />
+
+            {/* Sun Reflection Highlight */}
+            <div
+              className="absolute top-[15%] left-[20%] w-16 h-16 rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%)',
+              }}
+            />
+
+            {/* Outer Atmosphere Rings */}
+            <div className="absolute inset-[-6px] rounded-full border border-cyan-400/20" />
+            <div className="absolute inset-[-12px] rounded-full border border-cyan-400/10" />
+
+            {/* Tilted Orbital Ring 1 - Orange/Gold Satellite */}
+            <div className="absolute inset-[-50px]" style={{ transform: 'rotateX(70deg) rotateZ(-20deg)', transformStyle: 'preserve-3d' }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full border-2 border-orange-400/60"
+                style={{ boxShadow: '0 0 20px rgba(251, 146, 60, 0.4)' }}
+              >
+                {/* Bright Orange/Gold Satellite - Like a shooting star */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <motion.div
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                    className="w-4 h-4 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 rounded-full"
+                    style={{ boxShadow: '0 0 20px #f97316, 0 0 40px #fb923c, 0 0 60px #fbbf24, 0 0 80px #f97316' }}
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Tilted Orbital Ring 2 - Red/Pink Satellite */}
+            <div className="absolute inset-[-70px]" style={{ transform: 'rotateX(80deg) rotateZ(40deg)', transformStyle: 'preserve-3d' }}>
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full border border-rose-400/40"
+                style={{ boxShadow: '0 0 15px rgba(251, 113, 133, 0.3)' }}
+              >
+                {/* Bright Red/Pink Satellite */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                    className="w-3 h-3 bg-gradient-to-r from-pink-400 via-rose-500 to-red-600 rounded-full"
+                    style={{ boxShadow: '0 0 15px #f43f5e, 0 0 30px #fb7185, 0 0 45px #f43f5e' }}
+                  />
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Copyright & Powered By */}
+          <div className="absolute bottom-8 right-8 text-right">
+            <p className="text-slate-500 text-sm">Powered by Google Gemini AI</p>
+            <p className="text-slate-600 text-xs mt-1">© Ambuj Kumar Tripathi</p>
+          </div>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div ref={howItWorksRef} className="min-h-screen bg-slate-900 px-8 lg:px-16 py-20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-white mb-4 text-center">How It Works</h2>
+          <p className="text-slate-400 text-center mb-16 max-w-2xl mx-auto">
+            Discover the power of AI-driven geospatial intelligence in three simple steps
+          </p>
+
+          {/* Steps Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/50 rounded-2xl p-8 border border-slate-700/50"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold text-white">1</div>
+              <h3 className="text-xl font-bold text-white mb-3">Click Anywhere</h3>
+              <p className="text-slate-400">
+                Open the interactive map and click on any location in the world. From cities to remote villages, mountains to coastlines.
+              </p>
+            </motion.div>
+
+            {/* Step 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-slate-800/50 rounded-2xl p-8 border border-slate-700/50"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold text-white">2</div>
+              <h3 className="text-xl font-bold text-white mb-3">AI Analysis</h3>
+              <p className="text-slate-400">
+                Google Gemini AI instantly analyzes the location and generates comprehensive insights about its history, culture, and significance.
+              </p>
+            </motion.div>
+
+            {/* Step 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-800/50 rounded-2xl p-8 border border-slate-700/50"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold text-white">3</div>
+              <h3 className="text-xl font-bold text-white mb-3">Explore Stories</h3>
+              <p className="text-slate-400">
+                Read rich narratives about landmarks, local cuisine, weather patterns, architecture styles, and fascinating historical facts.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Features */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { icon: '🗺️', label: 'Interactive Map' },
+              { icon: '🤖', label: 'Gemini AI' },
+              { icon: '📸', label: 'Image Analysis' },
+              { icon: '🌍', label: 'Global Coverage' },
+            ].map((feature, i) => (
+              <div key={i} className="text-center p-4">
+                <div className="text-4xl mb-3">{feature.icon}</div>
+                <p className="text-white font-medium">{feature.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div >
+    </div >
   );
 };
 
@@ -480,6 +711,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [aiData, setAiData] = useState<AIResponse | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [language, setLanguage] = useState<'en' | 'hi'>('en'); // Language toggle state
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isAuthenticated) {
@@ -500,7 +732,14 @@ export default function App() {
     setAiData(null);
 
     try {
+      // Language instruction based on toggle - NO EXTRA TOKENS!
+      const languageInstruction = language === 'hi'
+        ? '**IMPORTANT: Generate the ENTIRE response in Hindi language (Devanagari script). All text, descriptions, and facts must be in Hindi.**'
+        : '**Generate the response in English language.**';
+
       const systemPrompt = `
+        ${languageInstruction}
+
         **ROLE:** You are the Geo-Narrator AI, an expert resource generator specializing in geographical, cultural, and historical synthesis. Your goal is to produce a comprehensive, original, and non-plagiarized informational resource for a specific location.
 
         **TARGET AUDIENCE & TONE:** The final output must be easily understandable by a general audience, yet detailed enough to serve as a research and general knowledge guide for students and competitive exam (UPSC) aspirants. Maintain a professional, objective, and engaging narrative style.
@@ -704,9 +943,27 @@ export default function App() {
       {/* Sidebar */}
       <div className="w-full md:w-[500px] bg-slate-900 border-r border-slate-800 flex flex-col h-1/2 md:h-full shadow-2xl overflow-y-auto">
         <div className="p-6 border-b border-slate-800 bg-slate-900/95 sticky top-0 z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">System Active</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">System Active</span>
+            </div>
+            {/* Language Toggle Button */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300"
+              style={{
+                background: language === 'hi'
+                  ? 'linear-gradient(135deg, #f97316, #ea580c)'
+                  : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                color: 'white',
+                boxShadow: language === 'hi'
+                  ? '0 0 15px rgba(249, 115, 22, 0.4)'
+                  : '0 0 15px rgba(59, 130, 246, 0.4)'
+              }}
+            >
+              {language === 'en' ? '🇺🇸 EN' : '🇮🇳 HI'}
+            </button>
           </div>
           <h1 className="text-3xl font-bold text-white">
             Geo-Narrator <span className="text-amber-400">AI</span>
