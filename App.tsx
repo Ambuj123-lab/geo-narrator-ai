@@ -11,7 +11,8 @@ import {
   X,
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Search
 } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -82,6 +83,21 @@ function MapResizer() {
 
     return () => clearTimeout(timer);
   }, [map]);
+
+  return null;
+}
+
+// FlyToLocation Component - Animates map to new position
+function FlyToLocation({ position }: { position: { lat: number, lng: number } | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (position) {
+      map.flyTo([position.lat, position.lng], 14, {
+        duration: 1.5
+      });
+    }
+  }, [position, map]);
 
   return null;
 }
@@ -712,6 +728,8 @@ export default function App() {
   const [aiData, setAiData] = useState<AIResponse | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [language, setLanguage] = useState<'en' | 'hi'>('en'); // Language toggle state
+  const [searchQuery, setSearchQuery] = useState(''); // Search input state
+  const [searchLoading, setSearchLoading] = useState(false); // Search loading state
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isAuthenticated) {
@@ -937,6 +955,41 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  // Search function - uses Nominatim API (FREE)
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setSearchLoading(true);
+    try {
+      // Nominatim API - FREE, no API key needed
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
+      );
+
+      if (response.data && response.data.length > 0) {
+        const result = response.data[0];
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+
+        // Set position to fly to
+        setPosition({ lat, lng });
+        setAddress(result.display_name);
+        setSearchQuery(''); // Clear search
+
+        // Generate AI content for this location
+        await generateAIContent(result.display_name);
+      } else {
+        alert('🔍 Location not found. Try a different search term.');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('❌ Search failed. Please try again.');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen w-screen bg-slate-900 flex flex-col md:flex-row overflow-hidden">
 
@@ -1076,7 +1129,44 @@ export default function App() {
           <MapResizer />
           <LocationMarker setPos={setPosition} onLocationSelect={handleMapClick} />
           {position && <Marker position={position} />}
+          {/* Map will fly to searched location via FlyToLocation component */}
+          <FlyToLocation position={position} />
         </MapContainer>
+
+        {/* Floating Search Bar - Gold/Amber Design */}
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-lg">
+          <p className="text-center text-amber-400 text-xl font-serif mb-3 drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Explore any place on Earth...
+          </p>
+          <form onSubmit={handleSearch} className="relative">
+            <div
+              className="flex items-center rounded-full overflow-hidden border-2 transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #3d1a1a 0%, #2a1010 100%)',
+                borderColor: '#d4a853',
+                boxShadow: '0 4px 30px rgba(212, 168, 83, 0.2)'
+              }}
+            >
+              <div className="pl-5 text-amber-500">
+                <Search size={20} />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder='Try "Taj Mahal" or "Eiffel Tower"...'
+                className="flex-1 bg-transparent px-4 py-4 text-amber-100 placeholder-amber-700/60 outline-none text-base"
+              />
+              <button
+                type="submit"
+                disabled={searchLoading || !searchQuery.trim()}
+                className="px-6 py-4 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold hover:from-amber-500 hover:to-amber-600 transition-all disabled:opacity-50"
+              >
+                {searchLoading ? <Loader2 className="animate-spin" size={20} /> : 'Go'}
+              </button>
+            </div>
+          </form>
+        </div>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur px-6 py-3 rounded-full shadow-2xl border border-slate-700 flex items-center gap-3 z-[1000]">
           <span className="relative flex h-3 w-3">
